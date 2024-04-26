@@ -29,13 +29,14 @@ jobs:
 
     - name: upload artifact
       run: |
-        mkdir output
+        mkdir -p output/plugins
         cp build/AIS-catcher output/
+        cp plugins/* output/plugins/
         
     - name: Upload Artifacts linux-arm64
       uses: actions/upload-artifact@v3
       with:
-        name: "AIS-catcher linux-arm64"
+        name: "AIS-catcher_linux-arm64"
         path: |
           output
 
@@ -47,11 +48,15 @@ jobs:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v4
 
-      - name: create sample script
+      - name: Create package structure
         run: |
           mkdir -p .debpkg/usr/local/bin
-          cp output/AIS-catcher .debpkg/usr/local/bin
+          mkdir -p .debpkg/usr/share/aiscatcher/my-plugins
+          unzip output/*.zip
+          cp output/AIS-catcher .debpkg/usr/local/bin/
+          cp output/plugins/* .debpkg/usr/share/aiscatcher/my-plugins/
           chmod +x .debpkg/usr/local/bin/AIS-catcher
+
           # create DEBIAN directory if you want to add other pre/post scripts
           mkdir -p .debpkg/DEBIAN
           echo -e "echo postinst" > .debpkg/DEBIAN/postinst
