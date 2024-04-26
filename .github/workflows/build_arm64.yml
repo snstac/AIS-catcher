@@ -2,13 +2,8 @@ name: Build Debian arm64
 
 on:
   push:
-    branches:
-      - 'main'
     tags:
-      - '*'
-  pull_request:
-  workflow_dispatch:
-
+      - 'v*.*.*'
 
 jobs:
   linux-arm64:
@@ -71,9 +66,7 @@ jobs:
           package: AIS-catcher
           package_root: .debpkg
           maintainer: Greg Albrecht
-          # ${{ github.ref }} 
-          # refs/tags/v*.*.*
-          version: "1.0.0" 
+          version: ${{ github.ref }}
           arch: 'arm64'
           desc: 'A multi-platform AIS Receiver'
 
