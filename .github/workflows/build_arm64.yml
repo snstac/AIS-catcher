@@ -71,6 +71,8 @@ jobs:
           package: AIS-catcher
           package_root: .debpkg
           maintainer: Greg Albrecht
-          version: ${{ github.ref }} # refs/tags/v*.*.*
+          # ${{ github.ref }} 
+          # refs/tags/v*.*.*
+          version: "1.0.0" 
           arch: 'arm64'
           desc: 'A multi-platform AIS Receiver'
