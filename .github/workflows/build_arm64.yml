@@ -21,14 +21,47 @@ jobs:
       run: apt install -y aha git make gcc g++ cmake pkg-config librtlsdr-dev whiptail libpq-dev
 
     - name: build AIS-catcher
-      run: mkdir build; cd build; cmake ..; make
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
 
     - name: upload artifact
-      run: mkdir output; cp build/AIS-catcher output/
-      
+      run: |
+        mkdir output
+        cp build/AIS-catcher output/
+        
     - name: Upload Artifacts linux-arm64
       uses: actions/upload-artifact@v3
       with:
         name: "AIS-catcher linux-arm64"
         path: |
           output
+
+  build-deb:
+    runs-on: ubuntu-latest
+    needs: linux-arm64
+    
+    steps:
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
+
+      - name: create sample script
+        run: |
+          mkdir -p .debpkg/usr/local/bin
+          cp output/AIS-catcher .debpkg/usr/local/bin
+          chmod +x .debpkg/usr/local/bin/AIS-catcher
+          # create DEBIAN directory if you want to add other pre/post scripts
+          mkdir -p .debpkg/DEBIAN
+          echo -e "echo postinst" > .debpkg/DEBIAN/postinst
+          chmod +x .debpkg/DEBIAN/postinst
+
+      - uses: jiro4989/build-deb-action@v3
+        with:
+          package: AIS-catcher
+          package_root: .debpkg
+          maintainer: Greg Albrecht
+          version: ${{ github.ref }} # refs/tags/v*.*.*
+          arch: 'arm64'
+          desc: 'A multi-platform AIS Receiver'
