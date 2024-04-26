@@ -1,4 +1,4 @@
-name: Build (Docker/Windows)
+name: Build Debian arm64
 
 on:
   push:
