@@ -34,7 +34,7 @@ jobs:
         cp plugins/* output/plugins/
         
     - name: Upload Artifacts linux-arm64
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: "AIS-catcher_linux-arm64"
         path: |
