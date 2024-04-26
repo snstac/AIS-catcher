@@ -47,14 +47,17 @@ jobs:
     steps:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v4
-
+        with:
+          name: "AIS-catcher_linux-arm64"
+ 
       - name: Create package structure
         run: |
           mkdir -p .debpkg/usr/local/bin
           mkdir -p .debpkg/usr/share/aiscatcher/my-plugins
-          unzip output/*.zip
-          cp output/AIS-catcher .debpkg/usr/local/bin/
-          cp output/plugins/* .debpkg/usr/share/aiscatcher/my-plugins/
+          ls -alR
+          unzip *.zip
+          cp AIS-catcher .debpkg/usr/local/bin/
+          cp plugins/* .debpkg/usr/share/aiscatcher/my-plugins/
           chmod +x .debpkg/usr/local/bin/AIS-catcher
 
           # create DEBIAN directory if you want to add other pre/post scripts
