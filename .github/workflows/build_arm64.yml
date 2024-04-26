@@ -55,17 +55,18 @@ jobs:
           mkdir -p .debpkg/usr/local/bin
           mkdir -p .debpkg/usr/share/aiscatcher/my-plugins
           ls -alR
-          unzip *.zip
           cp AIS-catcher .debpkg/usr/local/bin/
           cp plugins/* .debpkg/usr/share/aiscatcher/my-plugins/
           chmod +x .debpkg/usr/local/bin/AIS-catcher
-
+  
           # create DEBIAN directory if you want to add other pre/post scripts
           mkdir -p .debpkg/DEBIAN
           echo -e "echo postinst" > .debpkg/DEBIAN/postinst
           chmod +x .debpkg/DEBIAN/postinst
+          ls -alR
 
-      - uses: jiro4989/build-deb-action@v3
+      - name: Run build-deb-action from jiro4989
+        uses: jiro4989/build-deb-action@v3
         with:
           package: AIS-catcher
           package_root: .debpkg
