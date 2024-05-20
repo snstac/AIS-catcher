@@ -55,9 +55,9 @@ jobs:
           chmod +x .debpkg/usr/local/bin/AIS-catcher
   
           # create DEBIAN directory if you want to add other pre/post scripts
-          mkdir -p .debpkg/DEBIAN
-          echo -e "echo postinst" > .debpkg/DEBIAN/postinst
-          chmod +x .debpkg/DEBIAN/postinst
+          # mkdir -p .debpkg/DEBIAN
+          # echo -e "echo postinst" > .debpkg/DEBIAN/postinst
+          # chmod +x .debpkg/DEBIAN/postinst
           ls -alR
 
       - name: Run build-deb-action from jiro4989
