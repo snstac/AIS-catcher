@@ -1,0 +1,97 @@
+name: Build Debian amd64
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  linux-amd64:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: apt install -y aha git make gcc g++ cmake pkg-config librtlsdr-dev whiptail libpq-dev build-essential
+
+    - name: build AIS-catcher
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: upload artifact
+      run: |
+        mkdir -p output/plugins
+        cp build/AIS-catcher output/
+        cp plugins/* output/plugins/
+        
+    - name: Upload Artifacts linux-amd64
+      uses: actions/upload-artifact@v4
+      with:
+        name: "AIS-catcher_linux-amd64"
+        path: |
+          output
+
+  build-deb:
+    runs-on: ubuntu-20.04
+    
+    steps:
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: "AIS-catcher_linux-amd64"
+ 
+      - name: Create package structure
+        run: |
+          mkdir -p .debpkg/usr/local/bin
+          mkdir -p .debpkg/usr/share/aiscatcher/my-plugins
+          cp AIS-catcher .debpkg/usr/local/bin/
+          cp plugins/* .debpkg/usr/share/aiscatcher/my-plugins/
+          chmod +x .debpkg/usr/local/bin/AIS-catcher
+  
+          # create DEBIAN directory if you want to add other pre/post scripts
+          mkdir -p .debpkg/DEBIAN
+          cp debian/service .debpkg/DEBIAN
+          cp debian/default .debpkg/DEBIAN
+          cp debian/postinst .debpkg/DEBIAN
+
+      - name: Run build-deb-action from jiro4989
+        uses: jiro4989/build-deb-action@v3
+        with:
+          package: AIS-catcher
+          package_root: .debpkg
+          maintainer: jvde.github@gmail.com
+          version: ${{ github.ref }}
+          arch: 'amd64'
+          desc: 'A multi-platform AIS Receiver'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artifact-deb
+          path: |
+            *.deb
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: |
+            *.deb
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
