@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install dependencies
-      run: apt install -y aha git make gcc g++ cmake pkg-config librtlsdr-dev whiptail libpq-dev build-essential
+      run: sudo apt install -y aha git make gcc g++ cmake pkg-config librtlsdr-dev whiptail libpq-dev build-essential
 
     - name: build AIS-catcher
       run: |
