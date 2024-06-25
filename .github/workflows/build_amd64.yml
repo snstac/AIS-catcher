@@ -35,6 +35,7 @@ jobs:
           cp debian/service .debpkg/DEBIAN
           cp debian/default .debpkg/DEBIAN
           cp debian/postinst .debpkg/DEBIAN
+          chmod 0755 .debpkg/DEBIAN/postinst
 
       - name: Run build-deb-action from jiro4989
         uses: jiro4989/build-deb-action@v3
