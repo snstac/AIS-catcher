@@ -10,35 +10,18 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: sudo apt install -y aha git make gcc g++ cmake pkg-config librtlsdr-dev whiptail libpq-dev build-essential
+      - name: Install dependencies
+        run: sudo apt install -y aha git make gcc g++ cmake pkg-config librtlsdr-dev whiptail libpq-dev build-essential
 
-    - name: build AIS-catcher
-      run: |
-        mkdir build
-        cd build
-        cmake ..
-        make
+      - name: build AIS-catcher
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make
 
-    - name: upload artifact
-      run: |
-        mkdir -p output/plugins
-        cp build/AIS-catcher output/
-        cp plugins/* output/plugins/
-        
-    - name: Upload Artifacts linux-amd64
-      uses: actions/upload-artifact@v4
-      with:
-        name: "AIS-catcher_linux-amd64"
-        path: |
-          output
-
-  build-deb:
-    runs-on: ubuntu-20.04
-    
-    steps:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v4
         with:
@@ -48,7 +31,7 @@ jobs:
         run: |
           mkdir -p .debpkg/usr/local/bin
           mkdir -p .debpkg/usr/share/aiscatcher/my-plugins
-          cp AIS-catcher .debpkg/usr/local/bin/
+          cp build/AIS-catcher .debpkg/usr/local/bin/
           cp plugins/* .debpkg/usr/share/aiscatcher/my-plugins/
           chmod +x .debpkg/usr/local/bin/AIS-catcher
   
