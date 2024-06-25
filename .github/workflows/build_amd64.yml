@@ -15,7 +15,7 @@ jobs:
       - name: Install dependencies
         run: sudo apt install -y aha git make gcc g++ cmake pkg-config librtlsdr-dev whiptail libpq-dev build-essential
 
-      - name: build AIS-catcher
+      - name: build ais-catcher
         run: |
           mkdir build
           cd build
@@ -24,25 +24,25 @@ jobs:
 
       - name: Create package structure
         run: |
-          mkdir -p .debpkg/usr/local/bin
+          mkdir -p .debpkg/usr/bin
           mkdir -p .debpkg/usr/share/aiscatcher/my-plugins
-          cp build/AIS-catcher .debpkg/usr/local/bin/
+          cp build/AIS-catcher .debpkg/usr/bin/ais-catcher
           cp plugins/* .debpkg/usr/share/aiscatcher/my-plugins/
-          chmod +x .debpkg/usr/local/bin/AIS-catcher
+          chmod +x .debpkg/usr/bin/ais-catcher
 
           # create DEBIAN directory if you want to add other pre/post scripts
           mkdir -p .debpkg/DEBIAN
-          cp debian/service .debpkg/DEBIAN
-          cp debian/default .debpkg/DEBIAN
+          cp debian/service .debpkg/DEBIAN/ais-catcher.service
+          cp debian/default .debpkg/DEBIAN/ais-catcher.default
           cp debian/postinst .debpkg/DEBIAN
           chmod 0755 .debpkg/DEBIAN/postinst
 
       - name: Run build-deb-action from jiro4989
         uses: jiro4989/build-deb-action@v3
         with:
-          package: AIS-catcher
+          package: ais-catcher
           package_root: .debpkg
-          maintainer: jvde.github@gmail.com
+          maintainer: gba@snstac.com
           version: ${{ github.ref }}
           arch: 'amd64'
           desc: 'A multi-platform AIS Receiver'

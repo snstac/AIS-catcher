@@ -1,5 +1,5 @@
 #!/bin/bash
-# AIS-catcher.postinst
+# ais-catcher.postinst
 #
 # Copyright Sensors & Signals LLC https://www.snstac.com
 #
@@ -16,13 +16,13 @@
 # limitations under the License.
 #
 
-echo "AIS-catcher Post Install"
+echo "ais-catcher Post Install"
 
-# shellcheck source=AIS-catcher.default
-[ -f "/etc/default/AIS-catcher" ] && . /etc/default/AIS-catcher
+# shellcheck source=ais-catcher.default
+[ -f "/etc/default/ais-catcher" ] && . /etc/default/ais-catcher
 
 # Sane defaults:
-[ -z "$SERVER_HOME" ] && SERVER_HOME=/run/AIS-catcher
+[ -z "$SERVER_HOME" ] && SERVER_HOME=/run/ais-catcher
 [ -z "$SERVER_USER" ] && SERVER_USER=aiscatcher
 [ -z "$SERVER_NAME" ] && SERVER_NAME="AIS multiplatform receiver user"
 [ -z "$SERVER_GROUP" ] && SERVER_GROUP=aiscatcher
@@ -70,11 +70,11 @@ then
     fi
 fi
 
-systemctl enable AIS-catcher.service
+systemctl enable ais-catcher.service
 
-echo "---- AIS-catcher Install Complete ----"
-echo "Configure: sudo nano /etc/default/AIS-catcher"
-echo "Start: sudo systemctl start AIS-catcher.service"
-echo "Logs: sudo journalctl -fu AIS-catcher"
+echo "---- ais-catcher Install Complete ----"
+echo "Configure: sudo nano /etc/default/ais-catcher"
+echo "Start: sudo systemctl start ais-catcher.service"
+echo "Logs: sudo journalctl -fu ais-catcher"
 
 exit 0
