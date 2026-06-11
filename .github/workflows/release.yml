@@ -24,7 +24,8 @@ jobs:
       - name: Build Debian package
         run: |
           mkdir -p out
-          bash scripts/build-debian.sh -o out
+          sudo bash scripts/build-debian.sh -o out
+          sudo chown -R "$(id -u):$(id -g)" out
           v="$(dpkg-deb -f out/ais-catcher.deb Version)"
           a="$(dpkg-deb -f out/ais-catcher.deb Architecture)"
           mv out/ais-catcher.deb "out/ais-catcher_${v}_${a}.deb"
