@@ -51,6 +51,16 @@ readonly BUILD_DEPS=(
     libsqlite3-dev
     libusb-1.0-0-dev
     libpq-dev
+    # SoapySDR is the only way to reach an SDR that has no dedicated backend
+    # here -- LimeSDR, PlutoSDR, bladeRF, SDRplay, or anything behind
+    # SoapyRemote. Without it AIS-catcher can only talk to RTL/Airspy/HackRF,
+    # which is why the DragonEgg (LimeSDR Mini v2) box could not receive AIS at
+    # all: `-l` listed only the GPS, never the Lime.
+    #
+    # This dep alone is NOT sufficient -- CMakeLists.txt has
+    # `option(SOAPYSDR "Include Soapy SDR support" OFF)`, which is not
+    # auto-detect, so build_aiscatcher() must also pass -DSOAPYSDR=ON.
+    libsoapysdr-dev
 )
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2; }
@@ -146,11 +156,24 @@ build_aiscatcher() {
 
     cmake -S "${PROJECT_ROOT}" -B "${BUILD_DIR}/aiscatcher" \
         -DCMAKE_BUILD_TYPE=Release \
+        -DSOAPYSDR=ON \
         -DNMEA2000_PATH="${BUILD_DIR}" \
         -DRPATH_LIBRARY_DIR="${LIB_INSTALL_DIR}" \
         -DRUN_NUMBER="${run_num}"
 
     cmake --build "${BUILD_DIR}/aiscatcher" -j "${JOBS}"
+
+    # Fail loudly if SoapySDR did not actually get compiled in.
+    #
+    # cmake's SOAPYSDR block is `pkg_check_modules(...)` guarded: if the dev
+    # package is missing it prints a status line and carries on building a
+    # binary that silently cannot see half our SDRs. That is exactly how the
+    # shipped 0.68-snstac1 debs ended up with zero SoapySDR linkage while CI
+    # stayed green -- nothing ever asserted the feature was present.
+    if ! ldd "${BUILD_DIR}/aiscatcher/AIS-catcher" 2>/dev/null | grep -qi soapysdr; then
+        error "SoapySDR support was requested (-DSOAPYSDR=ON) but the binary does not link libSoapySDR. Is libsoapysdr-dev installed?"
+    fi
+    log "SoapySDR support confirmed linked into AIS-catcher"
 }
 
 get_version() {
