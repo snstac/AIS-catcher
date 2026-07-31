@@ -187,11 +187,33 @@ get_version() {
         error "AIS-catcher binary is not executable: ${binary}"
     fi
 
-    local version
-    version=$("${binary}" -h build 2>&1) || error "AIS-catcher failed to run: ${version}"
+    # Read STDOUT only, and pick the version line out of it by shape.
+    #
+    # This used to be `$(... 2>&1)` followed by a substring test rejecting any
+    # output containing "error". That worked only while the binary was quiet.
+    # Once SoapySDR is enabled the loader pulls in every installed Soapy module
+    # -- UHD, audio, remote -- and they announce themselves on stderr before
+    # main() runs:
+    #
+    #   [INFO] [UHD] linux; GNU C++ version 13.2.0; Boost_108300; UHD_4.6.0.0
+    #   [ERROR] avahi_service_browser_new() failed: Bad state
+    #   ALSA lib conf.c:5208:(_snd_config_evaluate) ... returned error: ...
+    #
+    # so the capture contained "error", the guard fired, and the build died
+    # with "Failed to extract version" -- while the real version sat on the
+    # last line of the very output being rejected. The version was never the
+    # problem; the noise was.
+    local raw version
+    raw=$("${binary}" -h build 2>/dev/null) || error "AIS-catcher failed to run"
 
-    if [[ -z "${version}" || "${version}" == *"error"* || "${version}" == *"Error"* ]]; then
-        error "Failed to extract version from AIS-catcher binary. Output: ${version}"
+    # The version is printed alone on its own line, e.g. "v0.68-0-g2829d7e".
+    # Anchoring to start-of-line keeps "UHD_4.6.0.0" and friends out even if a
+    # future module decides to log to stdout.
+    version=$(printf '%s\n' "${raw}" | tr -d '\r' \
+        | grep -E '^[[:space:]]*v?[0-9]+\.[0-9]+' | tail -n 1 | tr -d '[:space:]')
+
+    if [[ -z "${version}" ]]; then
+        error "Failed to extract version from AIS-catcher binary. Raw output: ${raw}"
     fi
 
     log "Extracted version: ${version}"
